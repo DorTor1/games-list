@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Games Vault - Список пройденных игр</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-area">
+                <i data-lucide="gamepad-2" class="logo-icon"></i>
+                <h1>My Games Vault</h1>
+            </div>
+            <button id="add-game-btn" class="btn-primary">
+                <i data-lucide="plus"></i>
+                Добавить игру
+            </button>
+        </header>
+
+        <main>
+            <div class="filters">
+                <button class="filter-btn active" data-status="all">Все</button>
+                <button class="filter-btn" data-status="completed">Пройдено</button>
+                <button class="filter-btn" data-status="playing">Играю</button>
+                <button class="filter-btn" data-status="backlog">В планах</button>
+            </div>
+
+            <div id="games-grid" class="games-grid">
+                <!-- Игры будут здесь -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Модальное окно -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Добавить новую игру</h2>
+                <button id="close-modal" class="btn-icon">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <form id="game-form">
+                <div class="form-group">
+                    <label for="game-title">Название игры</label>
+                    <input type="text" id="game-title" required placeholder="Напр: The Witcher 3">
+                </div>
+                <div class="form-group">
+                    <label for="game-image">URL картинки</label>
+                    <input type="url" id="game-image" required placeholder="https://example.com/image.jpg">
+                </div>
+                <div class="form-group">
+                    <label for="game-status">Статус</label>
+                    <select id="game-status">
+                        <option value="completed">Пройдено</option>
+                        <option value="playing">Играю</option>
+                        <option value="backlog">В планах</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-submit">Сохранить игру</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
+

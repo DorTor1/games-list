@@ -1,0 +1,13 @@
+# IDE Files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Project Specific
+*.log
+
