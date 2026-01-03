@@ -3,6 +3,9 @@ let games = JSON.parse(localStorage.getItem('games')) || [];
 let currentFilter = 'all';
 let editingId = null;
 
+// Ключ API RAWG получаем из LocalStorage
+let RAWG_API_KEY = localStorage.getItem('rawg_api_key') || '';
+
 // Элементы DOM
 const gamesGrid = document.getElementById('games-grid');
 const addGameBtn = document.getElementById('add-game-btn');
@@ -10,13 +13,73 @@ const modalOverlay = document.getElementById('modal-overlay');
 const closeModalBtn = document.getElementById('close-modal');
 const gameForm = document.getElementById('game-form');
 const filterBtns = document.querySelectorAll('.filter-btn');
+const sizeBtns = document.querySelectorAll('.size-btn');
+const viewBtns = document.querySelectorAll('.view-btn');
 const modalTitle = document.querySelector('.modal-header h2');
 const submitBtn = document.querySelector('.btn-submit');
+const gameSearchInput = document.getElementById('game-search');
+const searchResults = document.getElementById('search-results');
 
 // Инициализация
 function init() {
     renderGames();
     setupEventListeners();
+}
+
+// Поиск игр через RAWG API
+async function searchGames(query) {
+    if (!RAWG_API_KEY) {
+        searchResults.innerHTML = `
+            <div style="padding: 1rem; font-size: 0.8rem; color: var(--text-muted); text-align: center;">
+                Для работы поиска нужен API ключ RAWG.<br>
+                <a href="https://rawg.io/apidocs" target="_blank" style="color: var(--primary);">Получить ключ</a> и вставить в script.js
+            </div>
+        `;
+        searchResults.classList.add('active');
+        return;
+    }
+    if (query.length < 3) {
+        searchResults.classList.remove('active');
+        return;
+    }
+
+    try {
+        const response = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${query}&page_size=5`);
+        const data = await response.json();
+        displaySearchResults(data.results);
+    } catch (error) {
+        console.error('Ошибка при поиске игр:', error);
+    }
+}
+
+function displaySearchResults(results) {
+    searchResults.innerHTML = '';
+    if (results.length === 0) {
+        searchResults.classList.remove('active');
+        return;
+    }
+
+    results.forEach(game => {
+        const item = document.createElement('div');
+        item.className = 'search-result-item';
+        item.innerHTML = `
+            <img src="${game.background_image || 'https://via.placeholder.com/40x50'}" class="search-result-img">
+            <div class="search-result-info">
+                <span class="search-result-title">${game.name}</span>
+                <span class="search-result-year">${game.released ? game.released.split('-')[0] : 'N/A'}</span>
+            </div>
+        `;
+        item.addEventListener('click', () => selectGameFromSearch(game));
+        searchResults.appendChild(item);
+    });
+    searchResults.classList.add('active');
+}
+
+function selectGameFromSearch(game) {
+    document.getElementById('game-title').value = game.name;
+    document.getElementById('game-image').value = game.background_image;
+    searchResults.classList.remove('active');
+    gameSearchInput.value = '';
 }
 
 // Рендеринг игр
@@ -152,11 +215,58 @@ function setupEventListeners() {
     addGameBtn.addEventListener('click', openModal);
     closeModalBtn.addEventListener('click', closeModal);
     
+    // Элементы настроек
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsOverlay = document.getElementById('settings-overlay');
+    const closeSettingsBtn = document.getElementById('close-settings');
+    const saveSettingsBtn = document.getElementById('save-settings');
+    const apiKeyInput = document.getElementById('api-key-input');
+
+    settingsBtn.addEventListener('click', () => {
+        apiKeyInput.value = RAWG_API_KEY;
+        settingsOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    });
+
+    closeSettingsBtn.addEventListener('click', () => {
+        settingsOverlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    });
+
+    saveSettingsBtn.addEventListener('click', () => {
+        RAWG_API_KEY = apiKeyInput.value.trim();
+        localStorage.setItem('rawg_api_key', RAWG_API_KEY);
+        settingsOverlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+        alert('Настройки сохранены! Поиск теперь будет использовать новый ключ.');
+    });
+
+    settingsOverlay.addEventListener('click', (e) => {
+        if (e.target === settingsOverlay) {
+            settingsOverlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+    });
+
     modalOverlay.addEventListener('click', (e) => {
         if (e.target === modalOverlay) closeModal();
     });
 
     gameForm.addEventListener('submit', handleFormSubmit);
+
+    // Слушатель для поиска игр (с debounce)
+    let timeout = null;
+    gameSearchInput.addEventListener('input', (e) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => searchGames(e.target.value), 500);
+    });
+
+    // Закрытие выпадающего списка при клике вне его
+    document.addEventListener('click', (e) => {
+        if (!gameSearchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            searchResults.classList.remove('active');
+        }
+    });
 
     filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -164,6 +274,41 @@ function setupEventListeners() {
             btn.classList.add('active');
             currentFilter = btn.dataset.status;
             renderGames();
+        });
+    });
+
+    // Управление размером сетки
+    sizeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            sizeBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const size = btn.dataset.size;
+            let width;
+            if (size === 'small') width = '180px';
+            else if (size === 'medium') width = '280px';
+            else width = '400px';
+            
+            document.documentElement.style.setProperty('--grid-size', width);
+        });
+    });
+
+    // Переключение вида (Сетка/Список)
+    viewBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            viewBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const view = btn.dataset.view;
+            if (view === 'list') {
+                gamesGrid.classList.add('view-list');
+                document.querySelector('.grid-size-control').style.opacity = '0.3';
+                document.querySelector('.grid-size-control').style.pointerEvents = 'none';
+            } else {
+                gamesGrid.classList.remove('view-list');
+                document.querySelector('.grid-size-control').style.opacity = '1';
+                document.querySelector('.grid-size-control').style.pointerEvents = 'all';
+            }
         });
     });
 }

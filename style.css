@@ -80,6 +80,27 @@ h1 {
     box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.btn-icon-alt {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+    padding: 0.75rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-icon-alt:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+}
+
 .btn-icon {
     background: transparent;
     border: none;
@@ -96,11 +117,57 @@ h1 {
 }
 
 /* Filters */
+.controls-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+    animation: fadeIn 1s ease-out;
+}
+
+.view-controls {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.5rem 1rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.grid-size-control, .view-type-control {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.size-btn, .view-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.4rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.size-btn:hover, .view-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+}
+
+.size-btn.active, .view-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
 .filters {
     display: flex;
     gap: 1rem;
-    margin-bottom: 2.5rem;
-    animation: fadeIn 1s ease-out;
 }
 
 .filter-btn {
@@ -126,8 +193,52 @@ h1 {
 /* Games Grid */
 .games-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(var(--grid-size, 280px), 1fr));
     gap: 2rem;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.games-grid.view-list {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+/* Game Card Variants */
+.view-list .game-card {
+    display: flex;
+    height: 100px;
+    align-items: center;
+}
+
+.view-list .game-image-wrapper {
+    width: 150px;
+    height: 100%;
+    padding-top: 0;
+    flex-shrink: 0;
+}
+
+.view-list .game-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0 2rem;
+}
+
+.view-list .game-title {
+    margin-bottom: 0;
+    font-size: 1.2rem;
+}
+
+.view-list .card-actions {
+    position: relative;
+    top: auto;
+    right: auto;
+    opacity: 1;
+}
+
+.view-list .game-card:hover {
+    transform: translateX(10px);
 }
 
 /* Game Card */
@@ -309,6 +420,92 @@ h1 {
 
 .btn-submit:hover {
     background: var(--primary-hover);
+}
+
+/* Search Results Dropdown */
+.search-container {
+    position: relative;
+}
+
+.search-results-dropdown {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1100;
+    display: none;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+.search-results-dropdown.active {
+    display: block;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.search-result-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.search-result-img {
+    width: 40px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.search-result-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.search-result-title {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.search-result-year {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Divider */
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.5rem 0;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.divider:not(:empty)::before {
+    margin-right: 1rem;
+}
+
+.divider:not(:empty)::after {
+    margin-left: 1rem;
 }
 
 /* Animations */
