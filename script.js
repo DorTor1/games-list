@@ -2,9 +2,40 @@
 let games = JSON.parse(localStorage.getItem('games')) || [];
 let currentFilter = 'all';
 let editingId = null;
+let currentTheme = localStorage.getItem('theme') || 'dark';
 
 // Ключ API RAWG получаем из LocalStorage
 let RAWG_API_KEY = localStorage.getItem('rawg_api_key') || '';
+
+// Инициализация темы
+function initTheme() {
+    applyTheme(currentTheme);
+}
+
+function applyTheme(theme) {
+    if (theme === 'auto') {
+        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        updateThemeIcons(isDark ? 'dark' : 'light');
+    } else {
+        document.documentElement.setAttribute('data-theme', theme);
+        updateThemeIcons(theme);
+    }
+}
+
+function updateThemeIcons(activeTheme) {
+    const darkIcon = document.querySelector('.theme-icon-dark');
+    const lightIcon = document.querySelector('.theme-icon-light');
+    if (darkIcon && lightIcon) {
+        darkIcon.style.display = activeTheme === 'dark' ? 'none' : 'block';
+        lightIcon.style.display = activeTheme === 'light' ? 'none' : 'block';
+    }
+}
+
+// Слушатель системной темы
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (currentTheme === 'auto') applyTheme('auto');
+});
 
 // Элементы DOM
 const gamesGrid = document.getElementById('games-grid');
@@ -22,6 +53,7 @@ const searchResults = document.getElementById('search-results');
 
 // Инициализация
 function init() {
+    initTheme();
     renderGames();
     setupEventListeners();
 }
@@ -217,10 +249,18 @@ function setupEventListeners() {
     
     // Элементы настроек
     const settingsBtn = document.getElementById('settings-btn');
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
     const settingsOverlay = document.getElementById('settings-overlay');
     const closeSettingsBtn = document.getElementById('close-settings');
     const saveSettingsBtn = document.getElementById('save-settings');
     const apiKeyInput = document.getElementById('api-key-input');
+
+    // Переключение темы по кнопке
+    themeToggleBtn.addEventListener('click', () => {
+        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('theme', currentTheme);
+        applyTheme(currentTheme);
+    });
 
     settingsBtn.addEventListener('click', () => {
         apiKeyInput.value = RAWG_API_KEY;
@@ -238,7 +278,7 @@ function setupEventListeners() {
         localStorage.setItem('rawg_api_key', RAWG_API_KEY);
         settingsOverlay.classList.remove('active');
         document.body.style.overflow = 'auto';
-        alert('Настройки сохранены! Поиск теперь будет использовать новый ключ.');
+        alert('Ключ API сохранен!');
     });
 
     settingsOverlay.addEventListener('click', (e) => {
